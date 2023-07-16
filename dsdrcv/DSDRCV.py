@@ -150,5 +150,5 @@ inv_sum = pd.concat([inv_sum, inv_line_common_columns], ignore_index=True)
 # Sort the inv_sum by 'store_id' and 'invoice_id'
 inv_sum = inv_sum.sort_values(by=['store_id', 'invoice_id'])
 
-# Print inv_sum
-print(inv_sum)
+# Print inv_sum to csv
+inv_sum.to_csv('invoice_summary.csv')
