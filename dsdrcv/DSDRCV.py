@@ -3,34 +3,28 @@ import psycopg2
 import pandas as pd
 
 
-#Importing Local Psycopg Database
-
 # Establishing connection with DSDRCV Database
 conn = psycopg2.connect(
    database="DSDRCV", user='postgres', password='R43E!T-Ghvc98', host='localhost', port= '5432')
-
 # Creating a cursor object using the cursor() method
 cursor = conn.cursor()
-
 # Executing MYSQL function using the execute() method
 cursor.execute("select version()")
-
 # Fetch a single row using fetchone() method.
 data = cursor.fetchone()
 print("Connection established to: ", data)
+
 
 # Define SQL queries for each table
 sql_table1 = "SELECT * FROM store"
 sql_table2 = "SELECT * FROM supplier"
 sql_table3 = "SELECT * FROM invoice_header"
 sql_table4 = "SELECT * FROM invoice_line"
-
 # Read data from each table into separate dataframes
 store = pd.read_sql_query(sql_table1, conn)
 sup = pd.read_sql_query(sql_table2, conn)
 inv_hd = pd.read_sql_query(sql_table3, conn)
 inv_line = pd.read_sql_query(sql_table4, conn)
-
 # Print the head of each DataFrame
 print("Store:")
 print(store.head())
@@ -43,26 +37,20 @@ print(inv_hd.head())
 
 print("Invoice_Line:")
 print(inv_line.head())
-
 # Close the database connection
 conn.close()
 
 
-#DataFrame Manipulation, Cleaning and Combination
-
 # Create a dictionary to store the DataFrames
 dataframes = {'inv_hd': inv_hd, 'inv_line': inv_line}
-
 # Drop columns from each DataFrame in the dictionary
 for df_name, df in dataframes.items():
     modified_df = df.where(pd.notna(df), None)
     modified_df = modified_df.dropna(axis=1, how='all')
     dataframes[df_name] = modified_df
-
 # Access the modified DataFrames by their original names
 inv_hd = dataframes['inv_hd']
 inv_line = dataframes['inv_line']
-
 # Print the modified DataFrames
 print("Modified inv_hd:")
 print(inv_hd)
@@ -70,17 +58,17 @@ print(inv_hd)
 print("Modified inv_line:")
 print(inv_line)
 
+
 #Dropping DSD and Facility columns as they won't be needed for any reporting down the road
 sup = sup.drop(['dsd', 'facility'], axis=1)
 print(sup)
-
 #Dropping unnecessary columns from the inv_line dataframe
 inv_hd = inv_hd.drop(['dsd','final_total_ext_deposit', 'base_misc_charge', 'base_misc_allowance', 'base_total_deposit', 'shipment_id', 'upload_timestamp'], axis=1)
 print(inv_hd)
-
 #Dropping duplicate/unnecessary columns from the inv_line dataframe
 inv_line = inv_line.drop(['upc_number','inventory_units', 'deposit', 'deposit_mult', 'item_type', 'edi_flags'], axis=1)
 print(inv_line)
+
 
 #Creation of a list of the old inv_line column names and the new inv_line column names.
 line_col_names = {
@@ -91,7 +79,8 @@ line_col_names = {
      'final_cost': 'final_total_net',
      'final_allowance': 'final_misc_allowance',
      'billing_price': 'final_total_retail',
-     'billing_major_dept': 'major_dept_number'}
+     'billing_major_dept': 'major_dept_number'
+}
 
 #Applying the new inv_line column names
 inv_line = inv_line.rename(columns=line_col_names)
