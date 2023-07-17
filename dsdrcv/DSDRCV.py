@@ -1,7 +1,10 @@
 # Importing required modules
 import psycopg2
 import pandas as pd
+import logging
 
+#Creating Logfile
+logging.basicConfig(filename="logfilename.log", level=logging.INFO)
 
 # Establishing connection with DSDRCV Database
 conn = psycopg2.connect(
